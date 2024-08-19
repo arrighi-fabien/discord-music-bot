@@ -8,8 +8,9 @@ This is a simple Discord music bot built using `discord.py`, `yt-dlp`, and `ffmp
 - [Installation](#installation)
   - [Clone the Repository](#1-clone-the-repository)
   - [Install Dependencies](#2-install-dependencies)
-  - [Configure the Bot](#3-configure-the-bot)
-  - [Run the Bot](#4-run-the-bot)
+  - [Install ffmpeg](#3-install-ffmpeg)
+  - [Configure the Bot](#4-configure-the-bot)
+  - [Run the Bot](#5-run-the-bot)
 - [Docker Setup](#docker-setup)
   - [Build the Docker Image](#1-build-the-docker-image)
   - [Run the Docker Container](#2-run-the-docker-container)
@@ -36,7 +37,10 @@ pip install -r requirements.txt
 
 ### 3. Install ffmpeg
 
-### 3. Configure the Bot
+To use the bot without Docker, you need to install it manually. You can find the installation instructions here :
+[ffmpeg website](https://ffmpeg.org/download.html)
+
+### 4. Configure the Bot
 
 Create a ``.env`` file in the root directory and add your bot token:
 
@@ -45,7 +49,7 @@ Create a ``.env`` file in the root directory and add your bot token:
 BOT_TOKEN = 'your-bot-token-here'
 ```
 
-### 4. Run the Bot
+### 5. Run the Bot
 
 After configuring the bot, you can start it with:
 
@@ -57,14 +61,16 @@ python bot.py
 
 To run the bot inside a Docker container, follow these steps:
 
-### Build the Docker Image
+Start by configuring the bot using the following steps:: [configure the Bot](#4-configure-the-bot)
+
+### 1. Build the Docker Image
 In the root directory of your project, build the Docker image using the Dockerfile:
 
 ```bash
 docker build -t discord-music-bot .
 ```
 
-### Run the Docker Container
+### 2. Run the Docker Container
 Run the Docker container with your bot:
 
 ```bash
@@ -75,7 +81,7 @@ docker run -d --name discord-music-bot discord-music-bot
 
 The bot uses slash commands to interact. Here are the available commands:
 
-- ``/play <url>``: Play a song or playlist from a [Supported provider](#supported-provider).
+- ``/play <url>``: Play a song or playlist from a [supported provider](#supported-provider).
 - ``/pause``: Pause the currently playing song.
 - ``/resume``: Resume the paused song.
 - ``/skip``: Skip the currently playing song.
@@ -83,11 +89,13 @@ The bot uses slash commands to interact. Here are the available commands:
 
 ### Example usage
 
-```bash
+```
 /play https://www.youtube.com/watch?v=dQw4w9WgXcQ
 ```
 
 ## Supported provider
+
+The following providers are supported for the links:
 
 | Provider   | Song   | Playlist |
 |------------|:------:|:----------:|
