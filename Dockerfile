@@ -10,6 +10,7 @@ WORKDIR /usr/src/app
 COPY bot.py ./
 COPY config.py ./
 COPY utils/song.py ./utils/
+COPY utils/process_song.py ./utils/
 COPY utils/queue_manager.py ./utils/
 COPY requirements.txt ./
 COPY .env ./

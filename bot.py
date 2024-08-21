@@ -1,10 +1,9 @@
-import yt_dlp
 import asyncio
 import discord
 from discord.ext import commands
-from config import *
-from utils.song import *
+from utils.process_song import *
 from utils.queue_manager import *
+from config import BOT_TOKEN, FFMPEG_OPTIONS
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -13,25 +12,6 @@ tree = bot.tree
 
 queue = QueueManager()
 
-async def processSongs(url: str):
-    with yt_dlp.YoutubeDL(YTDL_FORMAT_OPTIONS) as ydl:
-        info = ydl.extract_info(url, download=False)
-
-        entries = info.get('entries', [info])
-        for entry in entries:
-
-            print(entry)
-            # YouTube and SoundCloud song
-            if 'id' in entry and entry.get('extractor', '') in SUPPORTED_PROVIDERS:
-                song = Song(entry['webpage_url'], entry['url'], entry['title'], entry['uploader'], entry['duration'], entry['thumbnail'], entry['extractor'])
-            # YouTube and SoundCloud playlist
-            elif 'id' in entry and entry.get('ie_key', '').lower() in SUPPORTED_PROVIDERS:
-                song = Song(entry['url'], None, None, None, None, None, None)
-            else:
-                continue
-
-            await queue.addSong(song)
-
 @tree.command(name='play', description='To play a song or playlist from a YouTube or SoundCloud URL')
 async def play(interaction: discord.Interaction, url: str):
     voice_client = interaction.guild.voice_client
@@ -39,7 +19,7 @@ async def play(interaction: discord.Interaction, url: str):
     if voice_client is None:
         if interaction.user.voice:
             channel = interaction.user.voice.channel
-            await channel.connect()
+            await channel.connect(self_deaf=True)
             voice_client = interaction.guild.voice_client
         else:
             await interaction.response.send_message("🔇 You are not connected to a voice channel.")
@@ -48,7 +28,7 @@ async def play(interaction: discord.Interaction, url: str):
     await interaction.response.send_message("🔄 Searching for your song...")
 
     async with interaction.channel.typing():
-        await processSongs(url)
+        await ProcessSong.processSongs(url, queue)
 
         if not voice_client.is_playing():
             await playNext(interaction)
@@ -61,9 +41,7 @@ async def playNext(interaction: discord.Interaction):
         song = await queue.getNextSong()
 
         if song.playable_url == None:
-            with yt_dlp.YoutubeDL(YTDL_FORMAT_OPTIONS) as ydl:
-                info = ydl.extract_info(song.base_url, download=False)
-                song.updateInfo(info)
+            await ProcessSong.processSongs(song.base_url, song=song)
 
         def afterPlaying(error):
             asyncio.run_coroutine_threadsafe(playNext(interaction), bot.loop)
